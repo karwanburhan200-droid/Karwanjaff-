@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="ckb"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>چێشتخانەی کوردەواری</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky restaurant header + category pills, responsive card grid, floating cart bar that opens a bottom sheet. RTL, Kurdish Sorani. */
+:root {
+  --bg: #F3F5F2;
+  --surface: #FFFFFF;
+  --ink: #16201A;
+  --muted: #667069;
+  --line: #E1E6E1;
+  --accent: #D43F2A;
+  --accent-soft: #FBE4DF;
+  --btn: #16201A;
+  --btn-fg: #FFFFFF;
+  --star: #E9A010;
+  --ok: #1F8A4C;
+  --shadow: 0 1px 2px rgba(22,32,26,.06), 0 8px 24px rgba(22,32,26,.06);
+  --font-display: "Noto Kufi Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1311; --surface: #181E1B; --ink: #EDF1EE; --muted: #98A39C; --line: #29312D;
+    --accent: #FF7058; --accent-soft: #3A1E19; --btn: #EDF1EE; --btn-fg: #0F1311; --star: #F2B73A; --ok: #4FC083;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1311; --surface: #181E1B; --ink: #EDF1EE; --muted: #98A39C; --line: #29312D;
+  --accent: #FF7058; --accent-soft: #3A1E19; --btn: #EDF1EE; --btn-fg: #0F1311; --star: #F2B73A; --ok: #4FC083;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  direction: rtl; text-align: right;
+  padding-block: 0 96px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin-inline: auto; }
+.num { font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+/* hero: dark warm band, text on the right (RTL), plate with floating cards on the left */
+.hero {
+  margin-top: 16px; border-radius: 28px; overflow: hidden; color: #FFF3E6;
+  padding: 18px clamp(16px, 4vw, 36px) 40px;
+  background: radial-gradient(60% 55% at 18% 62%, rgba(255,122,26,.30), transparent 70%), linear-gradient(160deg, #1D130C 0%, #0D0906 100%);
+}
+.hnav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.logo .mark { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #FF8A1F; color: #1D130C; font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.logo b { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.hcart { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding-inline: 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: #FFF3E6; font-weight: 600; font-size: 14px; }
+.hcart .hc { min-width: 22px; height: 22px; padding-inline: 6px; border-radius: 11px; display: inline-grid; place-items: center; background: #FF8A1F; color: #1D130C; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hgrid { display: grid; grid-template-columns: 1fr; gap: 30px; padding-top: 34px; align-items: center; }
+.tag { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(255,170,80,.4); background: rgba(255,138,31,.1); color: #FFC88A; font-size: 13px; }
+.tag i { width: 8px; height: 8px; border-radius: 50%; background: #5FD08C; display: inline-block; }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 8.5vw, 60px); line-height: 1.35; margin: 16px 0 12px; text-wrap: balance; }
+.hero h1 .gl { display: block; color: #FF9A3C; background: linear-gradient(90deg, #FFC15E, #FF7A1A); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { margin: 0; max-width: 46ch; color: #D9C7B4; font-size: 15.5px; }
+.cta { margin-top: 24px; height: 52px; padding-inline: 30px; border-radius: 999px; background: #FF8A1F; color: #1D130C; font-weight: 700; font-size: 16px; box-shadow: 0 10px 30px rgba(255,138,31,.35); }
+.stats { display: flex; flex-wrap: wrap; gap: 14px 30px; margin-top: 30px; }
+.stats div { display: flex; flex-direction: column; }
+.stats b { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: #FFC15E; line-height: 1.3; }
+.stats span { font-size: 13px; color: #BBA894; }
+.hvis { position: relative; width: min(100%, 340px); aspect-ratio: 1 / 1; margin-inline: auto; }
+.plate { position: absolute; inset: 9%; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #FFF3D4, #F3DAA2 62%, #DDB870); box-shadow: 0 30px 70px rgba(255,122,26,.32), inset 0 0 0 10px rgba(255,255,255,.35), inset 0 0 0 11px rgba(0,0,0,.08); }
+.plate span { font-size: clamp(88px, 26vw, 130px); line-height: 1; filter: drop-shadow(0 12px 12px rgba(0,0,0,.25)); }
+.fc { position: absolute; max-width: 66%; display: flex; flex-direction: column; background: #fff; color: #1D130C; padding: 8px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+.fc b { font-weight: 700; }
+.fc span { color: #6B6258; }
+.fc1 { top: 6%; right: 0; }
+.fc2 { bottom: 7%; left: 0; }
+@media (min-width: 820px) { .hgrid { grid-template-columns: 1.1fr .9fr; gap: 40px; } }
+
+.sticky {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); padding-block: 12px 10px; margin-top: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.search { position: relative; }
+.search input {
+  width: 100%; height: 46px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: inherit; padding-inline: 44px 14px;
+}
+.search input::placeholder { color: var(--muted); }
+.search svg { position: absolute; right: 14px; top: 13px; width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 2; stroke-linecap: round; }
+.search input { padding-right: 44px; padding-left: 14px; }
+.cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 2px; margin-inline: calc(-1 * max(16px, env(safe-area-inset-right, 0px))); padding-inline: max(16px, env(safe-area-inset-right, 0px)); }
+.cats::-webkit-scrollbar { display: none; }
+.cat { flex: none; height: 38px; padding-inline: 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-weight: 500; font-size: 14px; color: var(--ink); }
+.cat[aria-pressed="true"] { background: var(--btn); color: var(--btn-fg); border-color: var(--btn); }
+
+/* grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; margin-top: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.thumb { position: relative; height: 140px; display: grid; place-items: center; background: color-mix(in srgb, var(--h) 16%, var(--surface)); }
+.thumb span.emo { font-size: 66px; line-height: 1; filter: drop-shadow(0 8px 10px rgba(0,0,0,.18)); }
+.badge { position: absolute; top: 12px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--ink); color: var(--bg); }
+.badge.rate { right: 12px; display: inline-flex; gap: 4px; align-items: center; }
+.badge.rate b { color: var(--star); font-weight: 600; }
+.badge.hot { left: 12px; background: var(--accent); color: #fff; }
+.body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.body h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.5; text-wrap: balance; }
+.body p { margin: 0; color: var(--muted); font-size: 13.5px; flex: 1; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.price { font-weight: 600; font-size: 16px; white-space: nowrap; }
+.price small { color: var(--muted); font-weight: 400; font-size: 12px; margin-right: 4px; }
+.add { height: 40px; padding-inline: 18px; border-radius: 999px; background: var(--btn); color: var(--btn-fg); font-weight: 600; font-size: 14px; transition: transform .12s; }
+.add:active { transform: scale(.96); }
+.step { display: inline-flex; align-items: center; height: 40px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.step button { width: 40px; height: 40px; font-size: 20px; font-weight: 600; border-radius: 50%; color: inherit; }
+.step output { min-width: 22px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 48px 0; }
+
+/* cart bar */
+.bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; pointer-events: none;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.bar button { pointer-events: auto; display: flex; width: 100%; max-width: 1080px; margin-inline: auto; height: 56px; align-items: center; justify-content: space-between; padding-inline: 20px; border-radius: 18px; background: var(--btn); color: var(--btn-fg); font-weight: 600; box-shadow: var(--shadow); }
+.bar .count { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding-inline: 6px; border-radius: 14px; background: var(--accent); color: #fff; font-size: 14px; margin-left: 10px; font-variant-numeric: tabular-nums; }
+.bar[hidden] { display: none; }
+
+/* sheet */
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(8,12,10,.55); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 560px; max-height: 86%; display: flex; flex-direction: column; background: var(--surface); border-radius: 24px 24px 0 0; padding: 18px max(20px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+.sheet header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.sheet h2 { margin: 0; font-family: var(--font-display); font-size: 20px; }
+.x { width: 38px; height: 38px; border-radius: 50%; background: var(--bg); font-size: 18px; }
+.scroll { overflow-y: auto; min-height: 0; }
+.lines { margin: 0; padding: 0; list-style: none; }
+.lines li { display: flex; align-items: center; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.lines .e { font-size: 30px; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: color-mix(in srgb, var(--h) 16%, var(--surface)); flex: none; }
+.lines .n { flex: 1; min-width: 0; }
+.lines .n b { display: block; font-weight: 600; }
+.lines .n span { color: var(--muted); font-size: 13px; }
+.total { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; padding-block: 16px 12px; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.actions button { height: 50px; border-radius: 14px; font-weight: 600; }
+.copy { background: var(--btn); color: var(--btn-fg); }
+.clear { color: var(--muted); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 13px; }
+
+/* checkout form */
+.primary { background: var(--accent); color: #fff; }
+.form { display: flex; flex-direction: column; gap: 14px; padding-top: 6px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 600; font-size: 14px; }
+.field label em { color: var(--accent); font-style: normal; margin-right: 3px; }
+.field input, .field textarea { width: 100%; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; padding: 11px 14px; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+.field textarea { resize: vertical; min-height: 76px; }
+.field input.bad, .field textarea.bad { border-color: var(--accent); }
+.err { color: var(--accent); font-size: 13px; margin: 0; min-height: 1.2em; }
+.back { align-self: flex-start; color: var(--muted); font-size: 14px; padding: 4px 0; }
+.done { display: flex; align-items: center; gap: 10px; font-weight: 600; margin: 4px 0 12px; }
+.done span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 15px; }
+.paper { background: var(--bg); border: 1px dashed var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+
+/* receipt (screen preview and print) */
+.rc { font-size: 14px; line-height: 1.7; color: var(--ink); }
+.rc h3 { margin: 0; text-align: center; font-family: var(--font-display); font-size: 18px; }
+.rc .c { text-align: center; margin: 0; color: var(--muted); }
+.rc .dash { border-top: 1px dashed currentColor; opacity: .5; margin: 10px 0; }
+.rc .kv, .rc .ln { display: flex; justify-content: space-between; gap: 12px; }
+.rc .kv span { color: var(--muted); flex: none; }
+.rc .kv b { font-weight: 600; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+.rc .ln span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.rc .sum { display: flex; justify-content: space-between; font-weight: 700; font-size: 17px; }
+.rc .thx { text-align: center; margin: 12px 0 0; }
+.rc .note { margin: 6px 0 0; }
+#printArea { display: none; }
+
+/* table mode (iPad on the table) */
+.tbar { display: none; margin-top: 16px; padding: 14px 18px; border-radius: 20px; background: #1D130C; color: #FFF3E6; align-items: center; justify-content: space-between; gap: 12px; }
+.tmode .tbar { display: flex; }
+.tbar > span { font-weight: 600; }
+.tbar b { font-family: var(--font-display); font-size: 22px; color: #FFC15E; }
+.tmode .hero, .dmode .wrap, .dmode .bar { display: none; }
+.tmode [data-d] { display: none; }
+
+/* owner dashboard */
+.dash { max-width: 1080px; margin-inline: auto; padding-block: 22px 40px; }
+.pin { max-width: 360px; margin: 14vh auto 0; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.pin h1 { font-family: var(--font-display); font-size: 24px; margin: 0; }
+.pin p { margin: 0; color: var(--muted); }
+.pin input { height: 52px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; text-align: center; letter-spacing: .3em; font-size: 20px; }
+.pin button { height: 52px; border-radius: 14px; font-weight: 600; background: var(--btn); color: var(--btn-fg); }
+.dtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.dtop h1 { margin: 0; font-family: var(--font-display); font-size: 26px; }
+.dstat { color: var(--muted); font-size: 14px; }
+.demo { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 13.5px; }
+.dtabs { display: flex; gap: 8px; overflow-x: auto; margin-top: 14px; padding-block: 2px; }
+.dtabs button { flex: none; height: 42px; padding-inline: 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-weight: 500; font-size: 14px; }
+.dtabs button[aria-pressed="true"] { background: var(--btn); color: var(--btn-fg); border-color: var(--btn); }
+.dtabs b { margin-right: 8px; font-variant-numeric: tabular-nums; }
+.olist { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 14px; }
+.oc { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.oc.new { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.oc .h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.oc .t { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.oc .st { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.st.new { background: var(--accent-soft); color: var(--accent); }
+.st.prep { background: color-mix(in srgb, var(--star) 22%, var(--surface)); color: var(--ink); }
+.st.done { background: color-mix(in srgb, var(--ok) 20%, var(--surface)); color: var(--ok); }
+.oc .meta { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.oc ul { margin: 0; padding: 8px 0; list-style: none; border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
+.oc li { display: flex; justify-content: space-between; gap: 10px; }
+.oc .nt { font-weight: 600; background: var(--bg); padding: 6px 10px; border-radius: 10px; font-size: 13.5px; }
+.oc .sum { display: flex; justify-content: space-between; font-weight: 700; }
+.oc .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.oc .btns button { flex: 1; min-width: 90px; height: 44px; border-radius: 12px; font-weight: 600; font-size: 14px; background: var(--bg); }
+.oc .btns .go { background: var(--btn); color: var(--btn-fg); }
+.oc .btns .armed { background: var(--accent); color: #fff; }
+
+/* toast */
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); opacity: 0; z-index: 40; background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; max-width: calc(100% - 32px); text-align: center; transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+@media print {
+  @page { size: 80mm auto; margin: 4mm; }
+  html, body { background: #fff !important; color: #000 !important; padding: 0 !important; margin: 0 !important; }
+  body::before { display: none !important; }
+  .wrap, .bar, .scrim, .toast, .dash { display: none !important; }
+  #printArea { display: block !important; }
+  #printArea .rc, #printArea .rc .kv span, #printArea .rc .c { color: #000 !important; }
+  #printArea .rc { font-size: 12px; }
+}
+</style>
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap" dir="rtl" lang="ckb">
+  <div class="tbar"><span>چێشتخانەی کوردەواری</span><b>مێزی <span class="num" id="tnum"></span></b></div>
+
+  <section class="hero" aria-labelledby="hTitle">
+    <div class="hnav">
+      <div class="logo"><span class="mark" aria-hidden="true">ک</span><b>چێشتخانەی کوردەواری</b></div>
+      <button class="hcart" id="heroCart" type="button">سەبەتە<span class="hc" id="heroCount">0</span></button>
+    </div>
+    <div class="hgrid">
+      <div class="htext">
+        <span class="tag"><i></i>کراوەیە تا ١١ی شەو</span>
+        <h1 id="hTitle">بەخێربێی بۆ<span class="gl">چێشتخانەی کوردەواری</span></h1>
+        <p>خواردنی کوردی و برژاوی تازە، هەموو ڕۆژێک بە گۆشتی بەرخ و نانی تەنوورەوە. هەڵبژێرە، داوا بکە و بە خێرایی دەگاتە ماڵت.</p>
+        <button class="cta" id="seeMenu" type="button">سەیرکردنی مینۆ</button>
+        <div class="stats">
+          <div><b class="num">4.8 ★</b><span>هەڵسەنگاندن</span></div>
+          <div><b class="num">30</b><span>خولەک بۆ گەیاندن</span></div>
+          <div><b class="num" id="statCount">22</b><span>جۆر خواردن</span></div>
+        </div>
+      </div>
+      <div class="hvis" aria-hidden="true">
+        <div class="plate"><span>🍲</span></div>
+        <div class="fc fc1"><b>برژاوی تازە</b><span>هەموو ڕۆژێک</span></div>
+        <div class="fc fc2"><b>گەیاندن بۆ ماڵەوە</b><span>نزیکەی ٣٠ خولەک</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sticky" id="menu">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="بەدوای خواردنێکدا بگەڕێ..." autocomplete="off">
+    </div>
+    <div class="cats" id="cats" role="group" aria-label="بەشەکانی مینۆ"></div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <button id="open" type="button">
+    <span>بینینی سەبەتە<span class="count" id="count">0</span></span>
+    <span><span class="num" id="barTotal">0</span> د.ع</span>
+  </button>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <section class="sheet" role="dialog" aria-modal="true" aria-label="سەبەتە">
+    <header>
+      <h2 id="sheetTitle">سەبەتەی داواکاری</h2>
+      <button class="x" id="close" type="button" aria-label="داخستن">✕</button>
+    </header>
+    <div class="scroll">
+      <div id="vCart">
+        <ul class="lines" id="lines"></ul>
+        <div class="total"><span>کۆی گشتی</span><span><span class="num" id="sheetTotal">0</span> د.ع</span></div>
+        <div class="actions">
+          <button class="primary" id="toCheckout" type="button">بەردەوامبوون بۆ چێکاوت</button>
+          <button class="clear" id="clear" type="button">پاککردنەوەی سەبەتە</button>
+        </div>
+      </div>
+
+      <form id="vCheckout" class="form" hidden novalidate>
+        <button class="back" id="back" type="button">← گەڕانەوە بۆ سەبەتە</button>
+        <div class="field" data-d>
+          <label for="fName">ناوی تەواو<em>*</em></label>
+          <input id="fName" type="text" placeholder="ناوی کریار" autocomplete="name">
+        </div>
+        <div class="field" data-d>
+          <label for="fPhone">ژمارەی مۆبایل<em>*</em></label>
+          <input id="fPhone" type="tel" inputmode="tel" dir="ltr" style="text-align:right" placeholder="0750 123 4567" autocomplete="tel">
+        </div>
+        <div class="field" data-d>
+          <label for="fAddr">ناونیشانی گەیاندن<em>*</em></label>
+          <input id="fAddr" type="text" placeholder="گەڕەک، ناوی شەقام، نزیکترین جێگە" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label for="fNote">تێبینی (ئارەزوومەندانە)</label>
+          <textarea id="fNote" placeholder="بۆ نموونە: بێ پیاز، زیاتر سۆس..."></textarea>
+        </div>
+        <div class="total" style="padding-block:4px"><span>کۆی گشتی</span><span><span class="num" id="coTotal">0</span> د.ع</span></div>
+        <p class="err" id="fErr" role="alert"></p>
+        <div class="actions">
+          <button class="primary" id="placeOrder" type="submit">تەواوکردنی داواکاری</button>
+        </div>
+      </form>
+
+      <div id="vReceipt" hidden>
+        <p class="done"><span>✓</span><b id="doneMsg">داواکارییەکەت تۆمار کرا</b></p>
+        <div class="paper" id="receiptBox"></div>
+        <div class="actions">
+          <button class="primary" id="print" type="button">چاپکردنی وەسڵ</button>
+          <button class="copy" id="copy" type="button">کۆپیکردنی وەسڵ</button>
+          <button class="clear" id="newOrder" type="button">داخستن</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="dash" id="dash" dir="rtl" lang="ckb" hidden>
+  <form class="pin" id="pinForm">
+    <h1>پانێڵی داواکارییەکان</h1>
+    <p>پینی خاوەنکار بنووسە</p>
+    <input id="pinIn" type="password" inputmode="numeric" autocomplete="off" aria-label="پین">
+    <button type="submit">کردنەوە</button>
+    <p class="err" id="pinErr" role="alert"></p>
+  </form>
+  <div id="dashMain" hidden>
+    <div class="dtop"><h1>داواکارییەکان</h1><span class="dstat" id="dstat"></span></div>
+    <p class="demo" id="demo" hidden>دۆخی تاقیکردنەوە: داواکارییەکان تەنها لەسەر ئەم ئامێرە دەمێننەوە. بۆ ئەوەی لە ئایپادەکانی مێزەکانەوە بگەن، بنکەی داتا ببەستەوە.</p>
+    <div class="dtabs" id="dtabs"></div>
+    <div class="olist" id="olist"></div>
+  </div>
+</div>
+
+<div id="printArea" aria-hidden="true"></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  // Settings. firebaseUrl empty = test mode (orders stay on this device). Paste your Realtime Database URL to sync every iPad with your screen.
+  var CONFIG = { firebaseUrl: "", ownerPin: "1234" };
+  var HASH = (location.hash || "").replace("#", "");
+  var MODE = "menu", TABLE = "";
+  var mt = /^table-([A-Za-z0-9]{1,6})$/.exec(HASH);
+  if (mt) { MODE = "table"; TABLE = mt[1]; } else if (HASH === "orders") { MODE = "dash"; }
+
+  var CATS = ["هەموو", "پێشخواردن", "سوپ", "برژاو", "شلە", "برنج", "سەروپێ", "خواردنی سەرەکی", "پیتزا", "ڕووەکی", "شیرینی", "خواردنەوە", "دۆ و ماست"];
+  var ITEMS = [
+    { id: 1, n: "کەبابی بەرخ", d: "گۆشتی بەرخی تازە بە نانی تەنوور و پیازی سوور و سومەق.", p: 14000, c: "برژاو", e: "🍢", r: 4.7, h: "#D9552B" },
+    { id: 2, n: "ساسلیکی مریشک", d: "سنگی مریشکی مارینەکراو بە سۆسی تایبەتی چێشتخانە و سەوزە.", p: 12000, c: "برژاو", e: "🍗", r: 4.9, h: "#E08A1E", hot: "بەناوبانگ" },
+    { id: 3, n: "شیشی مریشک", d: "پارچەی مریشک لەسەر بەرە، لەگەڵ تەماتەی برژاو و برنج.", p: 11000, c: "برژاو", e: "🍢", r: 4.6, h: "#C8452F" },
+    { id: 4, n: "تکەی بەرخ", d: "پارچەی گۆشتی بەرخ بە ئاگری خەڵوز برژاو، لەگەڵ نان.", p: 16000, c: "برژاو", e: "🥩", r: 4.8, h: "#B03A4A" },
+    { id: 5, n: "ستێکی گۆشتی گا", d: "ستێکی نەرم بە کەرە و سەوزەی سوورکراو.", p: 22000, c: "برژاو", e: "🥩", r: 4.5, h: "#8E3B2E" },
+    { id: 6, n: "کەبابی ئادانا", d: "کەبابی تیژی گۆشتی دەستکوتراو بە بیبەری سوور و نانی تەنوور.", p: 13000, c: "برژاو", e: "🍢", r: 4.7, h: "#C83A22" },
+    { id: 7, n: "کفتەی برژاو", d: "کفتەی گۆشت و پیاز و جەرجیر لەسەر ئاگری خەڵوز.", p: 11000, c: "برژاو", e: "🍢", r: 4.5, h: "#B5602B" },
+    { id: 8, n: "جگەری بەرخ", d: "جگەری بەرخی تازە برژاو بە پیاز و ڕەیحان.", p: 9000, c: "برژاو", e: "🥩", r: 4.6, h: "#7E2F3A" },
+    { id: 9, n: "دڵ و گورچیلە", d: "دڵ و گورچیلەی بەرخ برژاو بە بیبەری ڕەش.", p: 9000, c: "برژاو", e: "🥩", r: 4.3, h: "#8A3B3B" },
+    { id: 10, n: "ڕانی بەرخ برژاو", d: "ڕانی بەرخی نەرم، بە هێواشی لەسەر خەڵوز برژاو.", p: 20000, c: "برژاو", e: "🍖", r: 4.8, h: "#B5602B" },
+    { id: 11, n: "باڵی مریشک", d: "باڵی مریشکی مارینەکراو برژاو، ترش و تیژ.", p: 8000, c: "برژاو", e: "🍗", r: 4.4, h: "#E08A1E" },
+    { id: 12, n: "ڕانی مریشک", d: "ڕانی مریشک بە سیر و لیمۆ لەسەر ئاگر.", p: 9000, c: "برژاو", e: "🍗", r: 4.5, h: "#D9962B" },
+    { id: 13, n: "ماسی برژاو", d: "ماسی تازە بە نمک و لیمۆ و پیاز لەسەر خەڵوز.", p: 17000, c: "برژاو", e: "🐟", r: 4.6, h: "#4F8FB5" },
+    { id: 14, n: "برژاوی تێکەڵ", d: "کەباب، شیش، تکە و جگەر پێکەوە، بۆ دوو کەس.", p: 35000, c: "برژاو", e: "🍖", r: 4.9, h: "#C8452F", hot: "تایبەت" },
+    { id: 15, n: "شلەی بامیە", d: "بامیەی نەرم لە سۆسی تەماتە و گۆشتی بەرخ، لەگەڵ برنج.", p: 7000, c: "شلە", e: "🥘", r: 4.7, h: "#C8452F" },
+    { id: 16, n: "شلەی لۆبیا", d: "لۆبیای سپی لە سۆسی تەماتە و گۆشت، بە نانی گەرم.", p: 6500, c: "شلە", e: "🥘", r: 4.6, h: "#B5602B" },
+    { id: 17, n: "شلەی نیسک", d: "نیسکی نەرم لە شلەی گۆشتدا، بە پیاز و بەهارات.", p: 6000, c: "شلە", e: "🥘", r: 4.5, h: "#D9A21E" },
+    { id: 18, n: "شلەی کەرەفس", d: "کەرەفس و جەرجیر لە شلەی ترش و گۆشتی بەرخ.", p: 7500, c: "شلە", e: "🥘", r: 4.4, h: "#4DA35B" },
+    { id: 19, n: "شلەی باینجان", d: "باینجانی سوورکراو لە سۆسی تەماتە و گۆشت.", p: 7500, c: "شلە", e: "🥘", r: 4.5, h: "#7A4FA0" },
+    { id: 20, n: "شلەی پاقلە", d: "پاقلەی سەوز بە ڕۆن و گۆشت، لەگەڵ برنج.", p: 6500, c: "شلە", e: "🥘", r: 4.3, h: "#8DA13A" },
+    { id: 21, n: "شلەی ماش", d: "ماشی ورد لە شلەی گۆشت و سەوزەدا.", p: 6000, c: "شلە", e: "🥘", r: 4.3, h: "#B8A02A" },
+    { id: 22, n: "شلەی پەتاتە و گۆشت", d: "پەتاتە و گۆشتی بەرخ بە سۆسی تەماتە.", p: 7000, c: "شلە", e: "🥘", r: 4.4, h: "#D4472E" },
+    { id: 23, n: "بریانی مریشک", d: "برنجی بەهاراتدار لەگەڵ مریشک، کشمیش و بادەم.", p: 9000, c: "برنج", e: "🍛", r: 4.7, h: "#D9A21E" },
+    { id: 24, n: "بریانی بەرخ", d: "برنجی بەهاراتدار لەگەڵ گۆشتی بەرخ و بادەمی سوورکراو.", p: 12000, c: "برنج", e: "🍛", r: 4.8, h: "#D9962B" },
+    { id: 25, n: "پلاوی گۆشت", d: "برنج بە ڕۆنی ماڵی لەگەڵ پارچەی گۆشتی بەرخ.", p: 11000, c: "برنج", e: "🍚", r: 4.6, h: "#C9A04A" },
+    { id: 26, n: "برنجی سپی", d: "برنجی سپی بە ڕۆنی ماڵی، لەگەڵ هەموو شلەکان.", p: 3000, c: "برنج", e: "🍚", r: 4.4, h: "#C9C2B0" },
+    { id: 27, n: "برنجی زەعفەران", d: "برنج بە زەعفەران و کشمیش و بادەم.", p: 5000, c: "برنج", e: "🍚", r: 4.5, h: "#E3A52B" },
+    { id: 28, n: "برنجی ماش", d: "برنج و ماش پێکەوە لە ڕۆندا، بە پیازی سوورکراو.", p: 4500, c: "برنج", e: "🍚", r: 4.4, h: "#B8A02A" },
+    { id: 29, n: "پاچەی بەرخ (سەروپێ)", d: "سەر و پێی بەرخ بە هێواشی کوڵاو، بە سیر و سرکە و نانی تەنوور.", p: 12000, c: "سەروپێ", e: "🍖", r: 4.8, h: "#B5602B", hot: "تایبەت" },
+    { id: 30, n: "سەری بەرخ", d: "سەری بەرخی کوڵاو لەگەڵ نانی تەنوور.", p: 8000, c: "سەروپێ", e: "🍖", r: 4.5, h: "#9C5A3A" },
+    { id: 31, n: "پێی بەرخ", d: "پێی بەرخی نەرم لە شلەی گەرمدا.", p: 6000, c: "سەروپێ", e: "🍖", r: 4.4, h: "#A8642B" },
+    { id: 32, n: "زمانی بەرخ", d: "زمانی بەرخی کوڵاو بە سیر و ڕۆن.", p: 7000, c: "سەروپێ", e: "🍖", r: 4.3, h: "#8E4F3B" },
+    { id: 33, n: "مێشکی بەرخ", d: "مێشکی بەرخی سوورکراو بە لیمۆ.", p: 6000, c: "سەروپێ", e: "🍖", r: 4.2, h: "#B07B5A" },
+    { id: 34, n: "دۆڵمەی کوردی", d: "گەڵای مێو و کەلەرم پڕکراو بە گۆشت و برنج.", p: 10000, c: "خواردنی سەرەکی", e: "🥘", r: 4.8, h: "#4F9A5A" },
+    { id: 35, n: "قۆزی بەرخ", d: "ڕانی بەرخ بە هێواشی لە فڕن پێگەیشتوو، لەسەر برنج.", p: 18000, c: "خواردنی سەرەکی", e: "🍖", r: 4.9, h: "#B5602B", hot: "تایبەت" },
+    { id: 36, n: "کوبەی بەرخ", d: "کوبەی برنجی پڕکراو بە گۆشت و گوێز.", p: 9000, c: "خواردنی سەرەکی", e: "🥟", r: 4.6, h: "#C9A04A" },
+    { id: 37, n: "تەپسی باینجان", d: "باینجان و گۆشت و تەماتە لە فڕندا.", p: 9000, c: "خواردنی سەرەکی", e: "🍆", r: 4.5, h: "#7A4FA0" },
+    { id: 38, n: "پیتزای مارگریتا", d: "پەنیری موزارێلا، تەماتە و ڕەیحان لەسەر هەویری تازە.", p: 10000, c: "پیتزا", e: "🍕", r: 4.4, h: "#D4472E" },
+    { id: 39, n: "پیتزای مریشک", d: "مریشکی برژاو، قارچک، بیبەر و پەنیری زۆر.", p: 13000, c: "پیتزا", e: "🍕", r: 4.6, h: "#E08A1E" },
+    { id: 40, n: "پیتزای پەپەرۆنی", d: "پارچەی پەپەرۆنی تیژ لەگەڵ پەنیری تواوە.", p: 14000, c: "پیتزا", e: "🍕", r: 4.5, h: "#B8382B" },
+    { id: 41, n: "شۆربای نیسک", d: "شۆربای نیسکی گەرم بە لیمۆ و نانی برژاو.", p: 4000, c: "سوپ", e: "🍲", r: 4.6, h: "#D9962B" },
+    { id: 42, n: "شۆربای گۆشت", d: "شۆربای گۆشتی بەرخ بە سەوزە و بەهارات.", p: 4500, c: "سوپ", e: "🍲", r: 4.5, h: "#C8452F" },
+    { id: 43, n: "حەمووس", d: "نۆک و تەحینە و ڕۆنی زەیتوون، لەگەڵ نانی گەرم.", p: 3500, c: "پێشخواردن", e: "🧆", r: 4.3, h: "#C9A04A" },
+    { id: 44, n: "سەمبوسە", d: "سەمبوسەی سوورکراو بە گۆشت و پیاز.", p: 3500, c: "پێشخواردن", e: "🥟", r: 4.4, h: "#D9962B" },
+    { id: 45, n: "ترشی", d: "تێکەڵەی ترشی خەیار، گەزەر و ئەنگوور.", p: 2000, c: "پێشخواردن", e: "🥒", r: 4.2, h: "#6AA84F" },
+    { id: 46, n: "سەلاتەی کوردی", d: "خەیار، تەماتە، پیاز و جەرجیر بە لیمۆ و ڕۆنی زەیتوون.", p: 3000, c: "ڕووەکی", e: "🥗", r: 4.4, h: "#4DA35B" },
+    { id: 47, n: "فەتووش", d: "سەوزە و نانی برژاو بە سۆسی سۆماق.", p: 4000, c: "ڕووەکی", e: "🥗", r: 4.4, h: "#6AA84F" },
+    { id: 48, n: "تەبووڵە", d: "جەرجیر و بورغول و تەماتە بە لیمۆ.", p: 4000, c: "ڕووەکی", e: "🥬", r: 4.3, h: "#4DA35B" },
+    { id: 49, n: "فەلافل", d: "گۆڵکەی نۆک و سەوزە، بە سەوزی و تەحینە.", p: 4000, c: "ڕووەکی", e: "🧆", r: 4.5, h: "#8DA13A" },
+    { id: 50, n: "باینجانی سوورکراو", d: "باینجانی سوورکراو بە سیر و ماستی چەورنەکراو.", p: 5000, c: "ڕووەکی", e: "🍆", r: 4.2, h: "#7A4FA0" },
+    { id: 51, n: "بەقڵاوە", d: "چینەکانی هەویری ناسک، گوێز و شەربەتی هەنگوین.", p: 5000, c: "شیرینی", e: "🍯", r: 4.8, h: "#D9A21E" },
+    { id: 52, n: "کنافە", d: "کنافەی گەرم بە پەنیر و شیرەی شەکر.", p: 6000, c: "شیرینی", e: "🍮", r: 4.7, h: "#E39A2E" },
+    { id: 53, n: "بەستەنی", d: "سێ گۆڵکە بەستەنی شیر و ژاڵە.", p: 2500, c: "شیرینی", e: "🍨", r: 4.3, h: "#E06A8C" },
+    { id: 54, n: "کلێچەی خورما", d: "کلێچەی نەرم پڕکراو بە خورما و هەنگوین.", p: 3000, c: "شیرینی", e: "🍪", r: 4.6, h: "#B5602B" },
+    { id: 55, n: "لوقمە", d: "گۆڵکەی سوورکراوی شیرین بە شیرەی شەکر.", p: 3500, c: "شیرینی", e: "🍩", r: 4.4, h: "#D9962B" },
+    { id: 56, n: "زلابیا", d: "زلابیای کرچ بە شەربەتی شەکر.", p: 3500, c: "شیرینی", e: "🍩", r: 4.3, h: "#E39A2E" },
+    { id: 57, n: "بەسبوسە", d: "کێکی سمید و هەنگوین بە شەربەتی گوڵ.", p: 4000, c: "شیرینی", e: "🍰", r: 4.5, h: "#C9A04A" },
+    { id: 58, n: "قەتایف", d: "قەتایفی پڕکراو بە پەنیر یان گوێز.", p: 4500, c: "شیرینی", e: "🥞", r: 4.5, h: "#D9A21E" },
+    { id: 59, n: "حەلوای تەحین", d: "حەلوای تەحین و شەکر لەگەڵ فستق.", p: 3500, c: "شیرینی", e: "🍯", r: 4.4, h: "#C9A04A" },
+    { id: 60, n: "شەکرپارە", d: "شیرینی قەڵەو بە بادەم و شەربەتی شەکر.", p: 3500, c: "شیرینی", e: "🍪", r: 4.4, h: "#D9962B" },
+    { id: 61, n: "گەز", d: "گەزی نەرم بە فستق و بادەم.", p: 4000, c: "شیرینی", e: "🍬", r: 4.5, h: "#E3A8A0" },
+    { id: 62, n: "شیر برنج", d: "شیر و برنج و شەکر، بە دارچین و فستق.", p: 3000, c: "شیرینی", e: "🍮", r: 4.4, h: "#E8D9B5" },
+    { id: 63, n: "چایی ڕەش", d: "چایی ڕەشی گەرم بە پەرداخی ئیستکان.", p: 1000, c: "خواردنەوە", e: "🍵", r: 4.5, h: "#A8642B" },
+    { id: 64, n: "چایی هێل", d: "چایی بە هێل، بۆنخۆش و گەرم.", p: 1500, c: "خواردنەوە", e: "🍵", r: 4.6, h: "#B5782B" },
+    { id: 65, n: "قاوەی کوردی", d: "قاوەی تاڵی ڕەسەن بە فنجان.", p: 2000, c: "خواردنەوە", e: "☕", r: 4.5, h: "#6B4423" },
+    { id: 66, n: "سەحلەب", d: "خواردنەوەی گەرمی شیر و سەحلەب بە دارچین.", p: 3000, c: "خواردنەوە", e: "☕", r: 4.6, h: "#E8D9B5" },
+    { id: 67, n: "شەربەتی لیمۆ", d: "لیمۆی تازە، نەعنا و سەهۆڵ.", p: 2500, c: "خواردنەوە", e: "🍹", r: 4.4, h: "#C8B72A" },
+    { id: 68, n: "شەربەتی ئەنار", d: "ئاوی ئەناری تازە و سارد.", p: 3500, c: "خواردنەوە", e: "🍹", r: 4.6, h: "#B0233A" },
+    { id: 69, n: "ئاوی پرتەقاڵ", d: "پرتەقاڵی تازە فشراو.", p: 3000, c: "خواردنەوە", e: "🧃", r: 4.5, h: "#E08A1E" },
+    { id: 70, n: "شەربەتی توو", d: "شەربەتی تووی سووری سارد.", p: 3000, c: "خواردنەوە", e: "🍹", r: 4.4, h: "#7A2F5A" },
+    { id: 71, n: "سەرکەنجبین", d: "شەربەتی سرکە و هەنگوین بە نەعنا.", p: 2500, c: "خواردنەوە", e: "🥤", r: 4.3, h: "#7FB08A" },
+    { id: 72, n: "شەربەتی بێدمشک", d: "شەربەتی بێدمشکی سارد.", p: 2500, c: "خواردنەوە", e: "🥤", r: 4.3, h: "#6FA4C9" },
+    { id: 73, n: "ئاوی کانیاو", d: "ئاوی ساردی بەتڵ.", p: 500, c: "خواردنەوە", e: "💧", r: 4.5, h: "#6FA4C9" },
+    { id: 74, n: "نۆشابەی گازدار", d: "نۆشابەی گازدار، سارد.", p: 1000, c: "خواردنەوە", e: "🥤", r: 4.2, h: "#B0233A" },
+    { id: 75, n: "دۆی کوردی", d: "دۆی سارد بە نەعنا، بە شێوازی کۆنی ماڵەوە.", p: 1000, c: "دۆ و ماست", e: "🥛", r: 4.6, h: "#6FA4C9" },
+    { id: 76, n: "دۆی ماڵی", d: "دۆی تازە لە ماستی ماڵی، تۆڵێک و سارد.", p: 1500, c: "دۆ و ماست", e: "🥛", r: 4.6, h: "#8FB8D9" },
+    { id: 77, n: "ماستاو", d: "ماست و ئاوی سارد بە خوێ و نەعنا.", p: 2000, c: "دۆ و ماست", e: "🥛", r: 4.5, h: "#9CC4D9" },
+    { id: 78, n: "ماستی ماڵی", d: "ماستی ڕەسەنی ماڵی بە پەرداخ.", p: 2000, c: "دۆ و ماست", e: "🥣", r: 4.6, h: "#E8E4D6" },
+    { id: 79, n: "ماست و خەیار", d: "ماست و خەیاری ورد بە نەعنا و سیر.", p: 2500, c: "دۆ و ماست", e: "🥒", r: 4.5, h: "#6AA84F" },
+    { id: 80, n: "ماستی کۆکراوە", d: "ماستی چەکەی خەست بە ڕۆنی زەیتوون.", p: 3000, c: "دۆ و ماست", e: "🥣", r: 4.4, h: "#E8E4D6" },
+    { id: 81, n: "پەنیری کوردی", d: "پەنیری ڕەسەنی ماڵی لەگەڵ نان و سەوزە.", p: 4000, c: "دۆ و ماست", e: "🧀", r: 4.5, h: "#E3C75A" },
+    { id: 82, n: "کەرەی ماڵی", d: "کەرەی تازەی ماڵی لەگەڵ هەنگوین.", p: 3500, c: "دۆ و ماست", e: "🧈", r: 4.4, h: "#E3C75A" },
+    { id: 83, n: "سوپی مریشک", d: "شۆربای مریشک بە سەوزە و نیسک و بەهاراتی ماڵ.", p: 4500, c: "سوپ", e: "🍲", r: 4.6, h: "#D9962B" },
+    { id: 84, n: "سوپی سەوزە", d: "کەرەفس، گەزەر، کولەکە و پەتاتە بە شۆربایەکی سووک.", p: 4000, c: "سوپ", e: "🥣", r: 4.4, h: "#4DA35B" },
+    { id: 85, n: "سوپی قارچک", d: "قارچکی تازە بە قەیماخ و ڕۆنی مەڕ.", p: 5000, c: "سوپ", e: "🍄", r: 4.5, h: "#B08A6A" },
+    { id: 86, n: "سوپی تەماتە", d: "تەماتەی گەرم و نەرم بە ڕەیحان و نانی برژاو.", p: 4000, c: "سوپ", e: "🍅", r: 4.5, h: "#D4472E" },
+    { id: 87, n: "سوپی جۆ", d: "جۆی نەرم لە شۆربای گۆشتدا، بە سەوزە.", p: 4500, c: "سوپ", e: "🥣", r: 4.4, h: "#C9A04A" },
+    { id: 88, n: "شۆربای ماست", d: "ماستی گەرم بە برنج و نەعنا، بە شێوازی کوردی.", p: 4000, c: "سوپ", e: "🥣", r: 4.5, h: "#E8E4D6" },
+    { id: 89, n: "سوپی نیسکی ڕەش", d: "نیسکی ڕەش بە پیازی سوورکراو و لیمۆ.", p: 4500, c: "سوپ", e: "🍲", r: 4.6, h: "#8A5A2B" }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cart = {};       // id -> qty
+  var cat = "هەموو";
+  var query = "";
+  var toastTimer;
+
+  function fmt(n) { return n.toLocaleString("en-US"); }
+  function byId(id) { return ITEMS.filter(function (i) { return i.id === id; })[0]; }
+  function totals() {
+    var q = 0, t = 0;
+    Object.keys(cart).forEach(function (k) { q += cart[k]; t += cart[k] * byId(+k).p; });
+    return { q: q, t: t };
+  }
+
+  function renderCats() {
+    $("cats").innerHTML = CATS.map(function (c) {
+      return '<button class="cat" type="button" data-c="' + c + '" aria-pressed="' + (c === cat) + '">' + c + "</button>";
+    }).join("");
+  }
+
+  function actionHtml(it) {
+    var q = cart[it.id] || 0;
+    if (!q) return '<button class="add" type="button" data-a="add" data-id="' + it.id + '">زیادکردن +</button>';
+    return '<span class="step"><button type="button" data-a="inc" data-id="' + it.id + '" aria-label="زیادکردن">+</button>' +
+      '<output>' + q + '</output>' +
+      '<button type="button" data-a="dec" data-id="' + it.id + '" aria-label="کەمکردنەوە">−</button></span>';
+  }
+
+  function renderGrid() {
+    var list = ITEMS.filter(function (i) {
+      return (cat === "هەموو" || i.c === cat) && (!query || (i.n + " " + i.d).indexOf(query) !== -1);
+    });
+    if (!list.length) { $("grid").innerHTML = '<p class="empty">هیچ خواردنێک نەدۆزرایەوە.</p>'; return; }
+    $("grid").innerHTML = list.map(function (i) {
+      return '<article class="card" style="--h:' + i.h + '">' +
+        '<div class="thumb"><span class="emo" aria-hidden="true">' + i.e + '</span>' +
+        '<span class="badge rate"><b>★</b><span class="num">' + i.r.toFixed(1) + '</span></span>' +
+        (i.hot ? '<span class="badge hot">' + i.hot + '</span>' : '') + '</div>' +
+        '<div class="body"><h3>' + i.n + '</h3><p>' + i.d + '</p>' +
+        '<div class="row"><span class="price"><span class="num">' + fmt(i.p) + '</span><small>د.ع</small></span>' +
+        '<span data-slot="' + i.id + '">' + actionHtml(i) + '</span></div></div></article>';
+    }).join("");
+  }
+
+  function refreshSlots() {
+    var slots = document.querySelectorAll("[data-slot]");
+    for (var k = 0; k < slots.length; k++) {
+      var it = byId(+slots[k].getAttribute("data-slot"));
+      slots[k].innerHTML = actionHtml(it);
+    }
+  }
+
+  function renderBar() {
+    var t = totals();
+    $("bar").hidden = t.q === 0;
+    $("count").textContent = t.q;
+    $("heroCount").textContent = t.q;
+    $("barTotal").textContent = fmt(t.t);
+  }
+
+  function renderSheet() {
+    var ids = Object.keys(cart);
+    $("lines").innerHTML = ids.map(function (k) {
+      var it = byId(+k), q = cart[k];
+      return '<li style="--h:' + it.h + '"><span class="e">' + it.e + '</span>' +
+        '<span class="n"><b>' + it.n + '</b><span class="num">' + fmt(it.p) + '</span> × ' + q + '</span>' +
+        '<span class="step"><button type="button" data-a="inc" data-id="' + it.id + '" aria-label="زیادکردن">+</button><output>' + q + '</output>' +
+        '<button type="button" data-a="dec" data-id="' + it.id + '" aria-label="کەمکردنەوە">−</button></span></li>';
+    }).join("");
+    $("sheetTotal").textContent = fmt(totals().t);
+  }
+
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("on"); }, 1800);
+  }
+
+  function change(id, d) {
+    var it = byId(id);
+    var q = (cart[id] || 0) + d;
+    if (q <= 0) delete cart[id]; else cart[id] = q;
+    if (d > 0 && q === 1) toast(it.n + " زیادکرا بۆ سەبەتە");
+    refreshSlots(); renderBar();
+    if (!$("scrim").hidden) {
+      renderSheet();
+      if (!Object.keys(cart).length) closeSheet();
+    }
+  }
+
+  var TITLES = { cart: "سەبەتەی داواکاری", checkout: "چێکاوت", receipt: "وەسڵی داواکاری" };
+  var lastReceipt = null;
+  function show(view) {
+    $("vCart").hidden = view !== "cart";
+    $("vCheckout").hidden = view !== "checkout";
+    $("vReceipt").hidden = view !== "receipt";
+    $("sheetTitle").textContent = TITLES[view];
+    document.querySelector(".scroll").scrollTop = 0;
+  }
+  function openSheet() { renderSheet(); show("cart"); $("scrim").hidden = false; }
+  function closeSheet() { $("scrim").hidden = true; }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function stamp(d) {
+    return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function receiptHtml(r) {
+    var who = r.type === "table"
+      ? '<div class="kv"><span>مێز</span><b class="num">' + esc(r.table) + "</b></div>"
+      : '<div class="kv"><span>کریار</span><b>' + esc(r.name) + "</b></div>" +
+        '<div class="kv"><span>مۆبایل</span><b class="num">' + esc(r.phone) + "</b></div>" +
+        '<div class="kv"><span>ناونیشان</span><b>' + esc(r.addr) + "</b></div>";
+    var lines = linesOf(r).map(function (l) {
+      return '<div class="ln"><span>' + esc(l.n) + " × " + l.q + '</span><span class="num">' + fmt(l.p * l.q) + "</span></div>";
+    }).join("");
+    return '<div class="rc">' +
+      "<h3>چێشتخانەی کوردەواری</h3><p class=\"c\">وەسڵی داواکاری</p>" +
+      '<div class="dash"></div>' +
+      '<div class="kv"><span>ژمارە</span><b class="num">#' + r.no + "</b></div>" +
+      '<div class="kv"><span>کات</span><b class="num">' + r.when + "</b></div>" +
+      who +
+      (r.note ? '<p class="note">تێبینی: ' + esc(r.note) + "</p>" : "") +
+      '<div class="dash"></div>' + lines + '<div class="dash"></div>' +
+      '<div class="sum"><span>کۆی گشتی</span><span><span class="num">' + fmt(r.total) + "</span> د.ع</span></div>" +
+      '<p class="thx">سوپاس بۆ هەڵبژاردنتان</p></div>';
+  }
+
+  function orderText(r) {
+    var lines = linesOf(r).map(function (l) { return "• " + l.n + " × " + l.q + " = " + fmt(l.p * l.q) + " د.ع"; });
+    return "چێشتخانەی کوردەواری - وەسڵی #" + r.no + "\n" + r.when + "\n" +
+      "کریار: " + r.name + "\nمۆبایل: " + r.phone + "\nناونیشان: " + r.addr + "\n" +
+      (r.note ? "تێبینی: " + r.note + "\n" : "") + lines.join("\n") + "\nکۆی گشتی: " + fmt(r.total) + " د.ع";
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) { if (e.target === $("scrim")) closeSheet(); return; }
+    var a = b.getAttribute("data-a");
+    if (b.hasAttribute("data-tab")) { dTab = b.getAttribute("data-tab"); renderDash(); return; }
+    if (b.hasAttribute("data-oa")) { dashAction(b.getAttribute("data-oa"), b.getAttribute("data-id"), b); return; }
+    if (a === "add" || a === "inc") change(+b.getAttribute("data-id"), 1);
+    else if (a === "dec") change(+b.getAttribute("data-id"), -1);
+    else if (b.classList.contains("cat")) { cat = b.getAttribute("data-c"); renderCats(); renderGrid(); }
+    else if (b.id === "open" || b.id === "heroCart") { if (Object.keys(cart).length) openSheet(); else toast("سەبەتەکە بەتاڵە، خواردنێک هەڵبژێرە"); }
+    else if (b.id === "seeMenu") { $("menu").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
+    else if (b.id === "close") closeSheet();
+    else if (b.id === "clear") { cart = {}; refreshSlots(); renderBar(); closeSheet(); }
+    else if (b.id === "toCheckout") { $("coTotal").textContent = fmt(totals().t); $("fErr").textContent = ""; show("checkout"); }
+    else if (b.id === "back") show("cart");
+    else if (b.id === "newOrder") closeSheet();
+    else if (b.id === "print") { try { window.print(); } catch (err) { toast("چاپکردن لەم شوێنەدا بەردەست نییە"); } }
+    else if (b.id === "copy") {
+      var text = orderText(lastReceipt);
+      var done = function () { toast("لیستی داواکاری کۆپی کرا"); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { if (fallbackCopy(text)) done(); else toast("کۆپی نەکرا، دەستی دیاری بکە"); });
+      } else if (fallbackCopy(text)) done(); else toast("کۆپی نەکرا");
+    }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+  $("q").addEventListener("input", function (e) { query = e.target.value.trim(); renderGrid(); });
+
+  function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function linesOf(r) {
+    var l = r.lines || [];
+    return Array.isArray(l) ? l.filter(Boolean) : Object.keys(l).map(function (k) { return l[k]; });
+  }
+
+  // Order storage: Firebase Realtime Database over plain HTTPS when configured, otherwise this browser's storage.
+  var Store = (function () {
+    var base = CONFIG.firebaseUrl.replace(/\/+$/, "");
+    var KEY = "kw_orders_v1", mem = {}, subs = [], polling = false;
+    function rd() { try { var v = localStorage.getItem(KEY); mem = v ? JSON.parse(v) : {}; } catch (e) {} return mem; }
+    function wr(o) { mem = o; try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} subs.forEach(function (f) { f(o); }); }
+    function api(path, method, body) {
+      return fetch(base + path, { method: method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined })
+        .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); });
+    }
+    function poll() {
+      var since = Date.now() - 36 * 3600 * 1000;
+      api("/orders.json?orderBy=%22createdAt%22&startAt=" + since, "GET").then(function (o) { subs.forEach(function (f) { f(o || {}); }); }, function () {});
+    }
+    return {
+      remote: !!base,
+      add: function (o) {
+        if (base) return api("/orders/" + o.id + ".json", "PUT", o);
+        var x = rd(); x[o.id] = o; wr(x); return Promise.resolve();
+      },
+      update: function (id, patch) {
+        if (base) return api("/orders/" + id + ".json", "PATCH", patch);
+        var x = rd(); if (x[id]) { Object.keys(patch).forEach(function (k) { x[id][k] = patch[k]; }); wr(x); } return Promise.resolve();
+      },
+      remove: function (id) {
+        if (base) return api("/orders/" + id + ".json", "DELETE");
+        var x = rd(); delete x[id]; wr(x); return Promise.resolve();
+      },
+      subscribe: function (f) {
+        subs.push(f);
+        if (base) { poll(); if (!polling) { polling = true; setInterval(poll, 4000); } }
+        else { f(rd()); window.addEventListener("storage", function (e) { if (e.key === KEY) f(rd()); }); }
+      }
+    };
+  })();
+
+  // Owner dashboard
+  var dOrders = {}, dTab = "new", seen = null, lastSig = "", ac = null;
+  function unlockAudio() {
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); } catch (e) {}
+  }
+  function beep() {
+    if (!ac) return;
+    try {
+      [0, 0.22].forEach(function (t, i) {
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = "sine"; o.frequency.value = i ? 1046 : 784;
+        g.gain.setValueAtTime(0.0001, ac.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.35, ac.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + t + 0.2);
+        o.connect(g); g.connect(ac.destination); o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.22);
+      });
+    } catch (e) {}
+  }
+  function ago(t) {
+    var m = Math.max(0, Math.floor((Date.now() - t) / 60000));
+    return m < 1 ? "ئێستا" : m + " خولەک لەمەوبەر";
+  }
+  function orderCard(o) {
+    var d = new Date(o.createdAt);
+    var title = o.type === "table" ? 'مێزی <span class="num">' + esc(o.table) + "</span>" : "گەیاندن";
+    var info = o.type === "table" ? "" :
+      '<div class="meta">' + esc(o.name) + ' · <span class="num">' + esc(o.phone) + "</span><br>" + esc(o.addr) + "</div>";
+    var lines = linesOf(o).map(function (l) {
+      return "<li><span>" + esc(l.n) + " × " + l.q + '</span><span class="num">' + fmt(l.p * l.q) + "</span></li>";
+    }).join("");
+    var id = esc(o.id);
+    var btns = "";
+    if (o.status === "new") btns += '<button class="go" type="button" data-oa="prep" data-id="' + id + '">دەستپێکردن</button>';
+    else if (o.status === "prep") btns += '<button class="go" type="button" data-oa="done" data-id="' + id + '">تەواو بوو</button>';
+    btns += '<button type="button" data-oa="print" data-id="' + id + '">چاپکردن</button>';
+    btns += '<button type="button" data-oa="del" data-id="' + id + '">سڕینەوە</button>';
+    var st = { "new": "نوێ", prep: "ئامادەکردن", done: "تەواو" }[o.status] || "نوێ";
+    return '<article class="oc ' + esc(o.status) + '"><div class="h"><span class="t">' + title + '</span><span class="st ' + esc(o.status) + '">' + st + "</span></div>" +
+      '<div class="meta"><span class="num">#' + esc(o.no) + "</span> · " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + " · " + ago(o.createdAt) + "</div>" +
+      info + "<ul>" + lines + "</ul>" +
+      (o.note ? '<div class="nt">تێبینی: ' + esc(o.note) + "</div>" : "") +
+      '<div class="sum"><span>کۆ</span><span><span class="num">' + fmt(o.total || 0) + "</span> د.ع</span></div>" +
+      '<div class="btns">' + btns + "</div></article>";
+  }
+  function renderDash() {
+    var list = Object.keys(dOrders).map(function (k) { return dOrders[k]; }).filter(Boolean)
+      .sort(function (a, b) { return b.createdAt - a.createdAt; });
+    var counts = { "new": 0, prep: 0, done: 0 };
+    list.forEach(function (o) { counts[o.status] = (counts[o.status] || 0) + 1; });
+    var tabs = [["new", "نوێ"], ["prep", "ئامادەکردن"], ["done", "تەواوبوو"], ["all", "هەموو"]];
+    $("dtabs").innerHTML = tabs.map(function (t) {
+      var n = t[0] === "all" ? list.length : (counts[t[0]] || 0);
+      return '<button type="button" data-tab="' + t[0] + '" aria-pressed="' + (dTab === t[0]) + '">' + t[1] + "<b>" + n + "</b></button>";
+    }).join("");
+    var day = new Date(); day.setHours(0, 0, 0, 0);
+    var today = list.filter(function (o) { return o.createdAt >= day.getTime(); });
+    var sales = today.reduce(function (s, o) { return s + (o.total || 0); }, 0);
+    $("dstat").innerHTML = 'ئەمڕۆ: <span class="num">' + today.length + "</span> داواکاری · <span class=\"num\">" + fmt(sales) + "</span> د.ع";
+    var shown = list.filter(function (o) { return dTab === "all" || o.status === dTab; });
+    $("olist").innerHTML = shown.length ? shown.map(orderCard).join("") : '<p class="empty">هیچ داواکارییەک نییە.</p>';
+  }
+  function onOrders(o) {
+    var ids = Object.keys(o);
+    if (seen === null) seen = {};
+    else {
+      var fresh = ids.filter(function (k) { return !seen[k] && o[k] && o[k].status === "new"; });
+      if (fresh.length) { beep(); toast("داواکاریی نوێ هات"); }
+    }
+    ids.forEach(function (k) { seen[k] = 1; });
+    var sig = JSON.stringify(o);
+    dOrders = o;
+    if (sig !== lastSig) { lastSig = sig; renderDash(); }
+  }
+  function dashAction(act, id, btn) {
+    var o = dOrders[id];
+    if (!o) return;
+    if (act === "prep" || act === "done") {
+      o.status = act; renderDash();
+      Store.update(id, { status: act }).catch(function () { toast("گۆڕانکارییەکە نەگەیشت، دووبارە هەوڵ بدەوە"); });
+    } else if (act === "print") {
+      $("printArea").innerHTML = receiptHtml(o);
+      try { window.print(); } catch (e) { toast("چاپکردن لەم شوێنەدا بەردەست نییە"); }
+    } else if (act === "del") {
+      if (btn.getAttribute("data-armed") !== "1") {
+        btn.setAttribute("data-armed", "1"); btn.classList.add("armed"); btn.textContent = "دڵنیایت؟";
+        setTimeout(function () { btn.removeAttribute("data-armed"); btn.classList.remove("armed"); btn.textContent = "سڕینەوە"; }, 3000);
+      } else {
+        delete dOrders[id]; renderDash();
+        Store.remove(id).catch(function () { toast("نەسڕایەوە، دووبارە هەوڵ بدەوە"); });
+      }
+    }
+  }
+  function startDash() {
+    $("pinForm").hidden = true; $("dashMain").hidden = false;
+    $("demo").hidden = Store.remote;
+    Store.subscribe(onOrders);
+    renderDash();
+    setInterval(renderDash, 30000);
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+  }
+  function initDash() {
+    $("dash").hidden = false;
+    document.addEventListener("click", unlockAudio);
+    var ok = false;
+    try { ok = sessionStorage.getItem("kw_pin_ok") === "1"; } catch (e) {}
+    $("pinForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      if ($("pinIn").value === CONFIG.ownerPin) {
+        try { sessionStorage.setItem("kw_pin_ok", "1"); } catch (e2) {}
+        unlockAudio(); startDash();
+      } else $("pinErr").textContent = "پینەکە هەڵەیە.";
+    });
+    if (ok) startDash();
+  }
+
+  $("vCheckout").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var isTable = MODE === "table";
+    var f = { name: $("fName"), phone: $("fPhone"), addr: $("fAddr"), note: $("fNote") };
+    ["fName", "fPhone", "fAddr"].forEach(function (id) { $(id).classList.remove("bad"); });
+    var msg = "";
+    if (!isTable) {
+      if (!f.name.value.trim()) { f.name.classList.add("bad"); msg = "ناوی تەواو بنووسە."; }
+      else if (f.phone.value.replace(/\D/g, "").length < 10) { f.phone.classList.add("bad"); msg = "ژمارەی مۆبایلێکی دروست بنووسە، بۆ نموونە 0750 123 4567."; }
+      else if (!f.addr.value.trim()) { f.addr.classList.add("bad"); msg = "ناونیشانی گەیاندن بنووسە."; }
+    }
+    $("fErr").textContent = msg;
+    if (msg) return;
+    var t = totals();
+    var order = {
+      id: newId(), type: isTable ? "table" : "delivery", table: isTable ? TABLE : "",
+      no: String(Date.now()).slice(-4), createdAt: Date.now(), when: stamp(new Date()),
+      name: isTable ? "" : f.name.value.trim(), phone: isTable ? "" : f.phone.value.trim(), addr: isTable ? "" : f.addr.value.trim(),
+      note: f.note.value.trim(), total: t.t, status: "new",
+      lines: Object.keys(cart).map(function (k) { var it = byId(+k); return { n: it.n, q: cart[k], p: it.p }; })
+    };
+    var btn = $("placeOrder");
+    btn.disabled = true;
+    Store.add(order).then(function () {
+      btn.disabled = false;
+      lastReceipt = order;
+      var html = receiptHtml(order);
+      $("receiptBox").innerHTML = html;
+      $("printArea").innerHTML = html;
+      $("doneMsg").textContent = isTable ? "داواکارییەکەت نێردرا بۆ چێشتخانە" : "داواکارییەکەت تۆمار کرا";
+      $("print").hidden = isTable; $("copy").hidden = isTable;
+      cart = {}; refreshSlots(); renderBar();
+      show("receipt");
+    }, function () { btn.disabled = false; toast("نەنێردرا، دووبارە هەوڵ بدەوە"); });
+  });
+
+  window.addEventListener("hashchange", function () { location.reload(); });
+  if (MODE === "dash") { document.documentElement.classList.add("dmode"); initDash(); }
+  else {
+    if (MODE === "table") {
+      document.documentElement.classList.add("tmode");
+      $("tnum").textContent = TABLE;
+      TITLES.checkout = "ناردنی داواکاری"; TITLES.receipt = "داواکاری نێردرا";
+      $("placeOrder").textContent = "ناردن بۆ چێشتخانە";
+    }
+    $("statCount").textContent = ITEMS.length;
+    renderCats(); renderGrid(); renderBar();
+  }
+})();
+</script>
+
+</body></html>
